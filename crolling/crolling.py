@@ -41,7 +41,7 @@ if(b=='뉴스'):
         print(i.attrs['href'])
         urlopen_img = Image.open(BytesIO(res))
         driver,quit()
-urlopen_img
+
 if(b=='블로그'):
     for j in title2:
         b_tag = j.get_text()
