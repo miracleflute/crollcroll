@@ -28,10 +28,13 @@ elements = driver.find_elements_by_css_selector('#contents_inner > div > table >
 #contents_inner > div > table > tbody > tr:nth-child(1) > td.mobile > a > div.subject
 for j in range(2,11):
     for i in range(1,11):
-        pead_path = '/html/body/div[2]/form/div/div/table/tbody/tr[{0}]/td[{1}]/a'.format(i,5)
-        a_tag = driver.find_element_by_xpath(pead_path).click()
+        pead_path = '/html/body/div[2]/form/div/div/table/tbody/tr[{}]'.format(i)
+        a_tag = driver.find_element_by_xpath(pead_path).text
+        pead_path3 = '/html/body/div[2]/form/div/div/table/tbody/tr[{0}]/td[{1}]/a'.format(i,5)
+        c_tag = driver.find_element_by_xpath(pead_path3).click()
+        print(a_tag)
         driver.implicitly_wait(3)
-        print("파일 다운")
+        print("\n")   
         if(i==10):
             pead_path2 = '/html/body/div[2]/form/div/div/div[4]/ul/li[{}]/a'.format(j)
             b_tag = driver.find_element_by_xpath(pead_path2).click()
