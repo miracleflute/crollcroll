@@ -1,3 +1,6 @@
+import re, openpyxl
+from openpyxl import Workbook
+import pandas as pd
 from bs4 import BeautifulSoup
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
@@ -13,46 +16,65 @@ from PIL import Image
 import urllib.request
 import time
 from io import BytesIO
+import kss
+
+wb = Workbook()
+ws_naver_news = wb.create_sheet()
+ws_naver_news.title = 'naver news'
+
+ws_wiki_news = wb.create_sheet("wiki news")
+
 
 driver = webdriver.Chrome(r"C:\Users\PC\chromedriver.exe")
+
 search = input('검색어를 입력하세요 : ')
 url = 'https://search.naver.com/search.naver?where=news&sm=tab_jum&query='+search
-url2 = 'https://section.blog.naver.com/Search/Post.naver?pageNo=1&rangeType=ALL&orderBy=sim&keyword='+search
-url3 = "https://search.pstatic.net/common/?src=https%3A%2F%2Fimgnews.pstatic.net%2Fimage%2Forigin%2F108%2F2022%2F03%2F29%2F3039729.jpg&type=ff264_180&expire=2&refresh=true"
 
-b = input('뉴스 or 블로그');
-req = urllib.request.Request(url3, headers = {"User-Agent" : "Mozilla/5.0"})
-res = urllib.request.urlopen(req).read()
+original_html = requests.get(url)
+html = BeautifulSoup(original_html.text, "html.parser")
+
+articles = html.select("div.group_news > ul.list_news > li div.news_area > a")
 
 
-if(b=='뉴스'):
-    driver.get(url)
-if(b=='블로그'):
-    driver.get(url2)
 
-soup = BeautifulSoup(driver.page_source, 'html.parser')
+ws_naver_news.append(["기사 타이틀", "관련 URL"])
 
-title = soup.select('a.news_tit')
-title2 = soup.select('a.desc_inner')
-if(b=='뉴스'):
-    for i in title:
-        a_tag = i.get_text()
-        print("\n",a_tag)
-        print(i.attrs['href'])
-        urlopen_img = Image.open(BytesIO(res))
-        driver,quit()
+ws_naver_news.column_dimensions['A'].width = 100
+ws_naver_news.column_dimensions['B'].width = 12
 
-if(b=='블로그'):
-    for j in title2:
-        b_tag = j.get_text()
-        print("\n",b_tag)
-        print(j.attrs['ng-href'])
-        driver,quit()
-    #sp_nws1 > div > div > a
-c = input('URL 입력')
-driver.get(c)
-news = Article(c)
-news.download()
 
-news.parse()
-print(summarize(news.text, word_count=50))
+A1_cell = ws_naver_news['A1']
+A1_cell.alignment = openpyxl.styles.Alignment(horizontal='center')
+A1_cell.font = openpyxl.styles.Font(color='0055FF')
+
+B1_cell = ws_naver_news['B1']
+B1_cell.alignment = openpyxl.styles.Alignment(horizontal='center')
+B1_cell.font = openpyxl.styles.Font(color='0055FF')
+
+print(url)
+
+news_title = []
+news_url = []
+
+for i in articles:
+    news_title.append(i.attrs['title'])
+    
+for j in articles:
+    news_url.append(j.attrs['href'])
+    
+              
+
+idx = 2
+for title,url in zip(news_title, news_url):
+    p_title = title
+    p_link = url
+    
+    ws_naver_news.append([p_title, "이동하기"])
+    ws_naver_news.cell(row=idx, column=2).hyperlink = p_link
+    
+    idx += 1
+    
+
+      
+wb.save('sample_wow.xlsx')
+wb.close
